@@ -64,3 +64,12 @@ button { font-family: Arial, Helvetica, sans-serif !important; font-size:16px !i
 	color: #333;
   text-decoration: underline;
 }
+
+#splitResults {
+	display: none;
+}
+
+.tab-content>.tab-pane {
+	display: block;
+	visibility: hidden;
+}

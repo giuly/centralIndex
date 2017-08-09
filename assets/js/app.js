@@ -50,11 +50,11 @@ $(document).ready(function() {
 	})
 
 	// Start a loading animation
-	function loadingIn() { $('.loading').show(); $('.error > div').html(''); $('.error').hide(); $('#list').html('');}
+	function loadingIn() { $('.loading').show(); $('.error > div').html(''); $('.error').hide(); $('#list').html(''); $('#splitResults').hide();}
 	// Close the loading animation
-	function loadingOut() { $('.loading').hide(); }
+	function loadingOut() { $('.loading').hide(); $('#splitResults').show(); }
 	// Error handler 
-	function error(msg) { $('.error').append('<div>' +msg+ '</div>').show(); $('#pagination').html('');}
+	function error(msg) { $('.error').append('<div>' +msg+ '</div>').show(); $('#pagination').html(''); $('#splitResults').hide();}
 	
 	// Search function
 	// @param1 - string (keyword)
@@ -106,6 +106,10 @@ $(document).ready(function() {
 						// Call search function
 						search(page, false);
 					})
+
+					// Generate map
+					generateMap(data);
+
 				} else {
 					// On error - print error mesagge
 					error(data['msg']);
@@ -182,5 +186,60 @@ $(document).ready(function() {
 			'</div>';
 
 		return template;	
-	}  
+	}
+
+	// Function that creates the map
+	// @param1 - object (data - serach results)
+	function generateMap(data) {
+		/**
+		 * Boilerplate map initialization code starts below:
+		 */
+		//Step 1: initialize communication with the platform
+		var platform = new H.service.Platform({
+		  app_id: 'DemoAppId01082013GAL',
+		  app_code: 'AJKnXv84fjrb0KIHawS0Tg',
+		  useCIT: true,
+		  useHTTPS: true
+		});
+		var defaultLayers = platform.createDefaultLayers();
+
+		//Step 2: initialize a map - this map is centered over Europe
+		$('#map').html('');
+		var map = new H.Map(document.getElementById('map'),
+		  defaultLayers.normal.map,{
+		  center: {lat:53.403401426601, lng:-6.0694344247224},
+		  zoom:10
+		});
+
+		//Step 3: make the map interactive
+		// MapEvents enables the event system
+		// Behavior implements default interactions for pan/zoom (also on mobile touch environments)
+		var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+		// Create the default UI components
+		var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+		// Now use the map as required...
+		addMarkersToMap(map, data);  
+	} 
+
+
+	// Function that adds markers on the map
+	// @param1 - object (map)
+	// @param2 - object (data - serach results)
+	// @return - void
+	function addMarkersToMap(map, data) {
+		$.each(data['data']['rows'], function(i, obj) {
+		   var marker = new H.map.Marker({lat:obj['geopoint']['latitude'], lng:obj['geopoint']['longitude']});
+	  		map.addObject(marker);
+		});
+
+	 
+	}
+
+	$('.tab-pane').first().css('visibility', 'visible');
+	$('.nav-tabs > li > a').on('click', function() {
+		$('.tab-pane').css('visibility', 'hidden');
+		$($(this).attr('href')).css('visibility', 'visible');
+	})
 })
