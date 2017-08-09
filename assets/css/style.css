@@ -55,3 +55,12 @@ button { font-family: Arial, Helvetica, sans-serif !important; font-size:16px !i
 .pagination {
 	float:right;
 }
+
+.pagination span a {
+	cursor: pointer;
+	margin-right:2px;
+}
+.pagination span a.current{
+	color: #333;
+  text-decoration: underline;
+}

@@ -8,6 +8,6 @@ if(!defined('denyAccess')) { die('Direct access not permitted');}
 
 	<div class="tab-pane active" id="list"></div>
 
-	<ul class="pagination"></ul>
+	<ul id="pagination" class="pagination"></ul>
 
 </div>

@@ -15,7 +15,7 @@ $itemsPerPage = 10;
 if(isset($_GET['location']) && isset($_GET['keyword'])) {
 	$keyword = trim($_GET['keyword']);
 	$location = trim($_GET['location']);
-	$page = trim($_GET['page']);
+	$page = (int)trim($_GET['page']);
 
 	try { 
 		$data = $api->getEntitySearchWhatBylocation( $keyword, $location, $itemsPerPage, $page, $defaulCountry, $defaultLang);

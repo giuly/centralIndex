@@ -1,5 +1,6 @@
 $(document).ready(function() {
 	var itemsPerPage = 10;
+	var step = 2;
 
 	// Autocomplete - keyword
 	$('#keyword').autocomplete({
@@ -45,7 +46,7 @@ $(document).ready(function() {
 		// load default page 
 		var page = 1;
 		// call search function
-		search(page);
+		search(page, true);
 	})
 
 	// Start a loading animation
@@ -53,14 +54,14 @@ $(document).ready(function() {
 	// Close the loading animation
 	function loadingOut() { $('.loading').hide(); }
 	// Error handler 
-	function error(msg) { $('.error').append('<div>' +msg+ '</div>').show();	}
+	function error(msg) { $('.error').append('<div>' +msg+ '</div>').show(); $('#pagination').html('');}
 	
 	// Search function
 	// @param1 - string (keyword)
 	// @param2 - string (location)
 	// @param3 - integer (page)
 	// return - void
-	function search(page){
+	function search(page, init){
 		
 		// Add loading bar
 		loadingIn();
@@ -71,7 +72,7 @@ $(document).ready(function() {
 		$.ajax({
 			url: '../../controller/search.php',
 			data: {
-				page,
+				page: page,
 				keyword: keyword,
 				location: location
 			},
@@ -85,22 +86,25 @@ $(document).ready(function() {
 					  resultsTemplate += renderTemplate(obj);
 					});
 					$('#list').html(resultsTemplate);
+					
 					// Generate pagination
-					paginate(data['data']['total_rows'], page);
+					if(init) {
+						paginate(data['data']['total_rows'], page);
+					}
 					// Show phone number
 					$('.showPhone').on('click', function(e) {
 						e.preventDefault();
 						$(this).hide()
 						$(this).next('span.phoneNumberHid').show();
 					})
-					// Search 
+					// Search form pagination
 					$('.searchFromPage').on('click', function(e) {
 						// Prevent form submisson
 						e.preventDefault();
 						// load page sent from pagination
 						var page = $(this).attr('data-rel');
 						// call search function
-						search(page);
+						search(page, false);
 					})
 				} else {
 					// On error - print error mesagge
@@ -114,13 +118,12 @@ $(document).ready(function() {
 	// @param - integer (totalRows)
 	// @return - void
 	function paginate(totalRows, currentPage) {
-		var paginateTemplate = '';
-		var totalPages = Math.ceil(totalRows/itemsPerPage);
-		for(var i=1; i<=totalPages; i++) {
-			var active = (i == currentPage) ? "active" : ""
-			paginateTemplate += '<li class="'+active+'"><a href="#" data-rel="'+i+'" class="searchFromPage">'+ i +'</a></li>';
-		}
-		$('.pagination').html(paginateTemplate);
+
+		Pagination.Init(document.getElementById('pagination'), {
+	    size: Math.ceil(totalRows/itemsPerPage), // pages size
+	    page: currentPage, // selected page
+	    step: step // pages before and after current
+	  });
 	}
 
 	// Load template - Simulate a template engine
