@@ -7,7 +7,6 @@
     
     // store the user's API key and whether debuggin is required
     protected $apikey;
-    protected $debugMode;
     
     /**
      * Constructor - store the api key in the class
@@ -42,11 +41,11 @@
       $curl = curl_init();
       // Set some options - we are passing in a useragent too here
       curl_setopt_array($curl, array(
-          CURLOPT_RETURNTRANSFER => 1,
-          CURLOPT_TIMEOUT => 30,
-          CURLOPT_URL => $url,
-          CURLOPT_USERAGENT => 'Centralindex Sample cURL Request',
-          CURLOPT_POST => false
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_URL => $url,
+        CURLOPT_USERAGENT => 'Centralindex Sample cURL Request',
+        CURLOPT_POST => false
       ));
       // Send the request & save response to $resp
       $resp = curl_exec($curl);

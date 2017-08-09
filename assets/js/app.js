@@ -1,6 +1,15 @@
 $(document).ready(function() {
 	var itemsPerPage = 10;
 	var step = 2;
+	var centerLng;
+	var centerLat;
+
+	// Toggle tabs
+	$('.tab-pane').first().css('visibility', 'visible');
+	$('.nav-tabs > li > a').on('click', function() {
+		$('.tab-pane').css('visibility', 'hidden');
+		$($(this).attr('href')).css('visibility', 'visible');
+	})
 
 	// Autocomplete - keyword
 	$('#keyword').autocomplete({
@@ -39,7 +48,7 @@ $(document).ready(function() {
 	    }
 	})
 
-	// Search 
+	// Search from form box
 	$('.search').on('click', function(e) {
 		// Prevent form submisson
 		e.preventDefault();
@@ -56,11 +65,12 @@ $(document).ready(function() {
 	// Error handler 
 	function error(msg) { $('.error').append('<div>' +msg+ '</div>').show(); $('#pagination').html(''); $('#splitResults').hide();}
 	
-	// Search function
-	// @param1 - string (keyword)
-	// @param2 - string (location)
-	// @param3 - integer (page)
-	// return - void
+	/** Search function
+	 *  @param1 - string (keyword)
+	 *  @param2 - string (location)
+	 *  @param3 - integer (page)
+	 *  return - void
+	 */
 	function search(page, init){
 		
 		// Add loading bar
@@ -97,7 +107,7 @@ $(document).ready(function() {
 						$(this).hide()
 						$(this).next('span.phoneNumberHid').show();
 					})
-					// Search form pagination
+					// Call search form pagination
 					$('.searchFromPage').on('click', function(e) {
 						// Prevent form submisson
 						e.preventDefault();
@@ -118,10 +128,11 @@ $(document).ready(function() {
 		})
 	}
 
-	// Build the pagination
-	// @param1 - integer (totalRows)
-	// @param2 - integer (currentPage)
-	// @return - void
+	/** Build the pagination
+	 *  @param1 - integer (totalRows)
+	 *  @param2 - integer (currentPage)
+	 *  @return - void
+	 */
 	function paginate(totalRows, currentPage) {
 
 		Pagination.Init(document.getElementById('pagination'), {
@@ -131,9 +142,10 @@ $(document).ready(function() {
 	  });
 	}
 
-	// Load template - Simulate a template engine
-	// @params - object
-	// @return - string
+	/** Load template - Simulate a template engine
+	 *  @params - object
+	 *  @return - string
+	 */
 	function renderTemplate(data) {
 		// check if has phone
 		var phoneNumber = '<span><i class="icon-ban-circle" aria-hidden="true"></i>&nbsp;Not available</span>';
@@ -188,7 +200,8 @@ $(document).ready(function() {
 		return template;	
 	}
 
-	// Function that creates the map
+	/******************************************************************************************* Here Map ******************************************************/
+
 	// @param1 - object (data - serach results)
 	function generateMap(data) {
 		/**
@@ -203,13 +216,14 @@ $(document).ready(function() {
 		});
 		var defaultLayers = platform.createDefaultLayers();
 
-		//Step 2: initialize a map - this map is centered over Europe
+		//Step 2: initialize a map - this map is centered over the first Lat&Lng received from search results
 		$('#map').html('');
+		centerMap(data);
 		var map = new H.Map(document.getElementById('map'),
-		  defaultLayers.normal.map,{
-		  center: {lat:53.403401426601, lng:-6.0694344247224},
-		  zoom:10
-		});
+		   	defaultLayers.normal.map,{
+			  center: {lat:centerLat, lng:centerLng},
+			  zoom: 10
+			});
 
 		//Step 3: make the map interactive
 		// MapEvents enables the event system
@@ -220,26 +234,61 @@ $(document).ready(function() {
 		var ui = H.ui.UI.createDefault(map, defaultLayers);
 
 		// Now use the map as required...
-		addMarkersToMap(map, data);  
+		addInfoBubble(map, data, ui);
 	} 
 
-
-	// Function that adds markers on the map
-	// @param1 - object (map)
-	// @param2 - object (data - serach results)
-	// @return - void
-	function addMarkersToMap(map, data) {
+	/**
+	 * Get first geolocation encountered in data results
+	 * @param - object (data results)
+	 * @return - object (lat lng)
+	 */
+	function centerMap(data) {
 		$.each(data['data']['rows'], function(i, obj) {
-		   var marker = new H.map.Marker({lat:obj['geopoint']['latitude'], lng:obj['geopoint']['longitude']});
-	  		map.addObject(marker);
-		});
-
-	 
+			if( typeof obj['geopoint'] != 'undefined') {
+				centerLng = obj['geopoint']['longitude'];
+				centerLat = obj['geopoint']['latitude'];
+				return false;
+			}
+		})
 	}
 
-	$('.tab-pane').first().css('visibility', 'visible');
-	$('.nav-tabs > li > a').on('click', function() {
-		$('.tab-pane').css('visibility', 'hidden');
-		$($(this).attr('href')).css('visibility', 'visible');
-	})
+	function addMarkerToGroup(group, coordinate, html) {
+		var marker = new H.map.Marker(coordinate);
+		// add custom data to the marker
+		marker.setData(html);
+		group.addObject(marker);
+	}
+
+	/**
+	 * Clicking on a marker opens an infobubble which holds HTML content related to the marker.
+	 * @param1 object {H.Map} map      A HERE Map instance within the application
+	 * @param2 object results
+	 * @param3 object ui component
+	 */
+	function addInfoBubble(map, data, ui) {
+		var group = new H.map.Group();
+
+		map.addObject(group);
+
+		// add 'tap' event listener, that opens info bubble, to the group
+		group.addEventListener('tap', function (evt) {
+		// event target is the marker itself, group is a parent event target
+		// for all objects that it contains
+		var bubble =  new H.ui.InfoBubble(evt.target.getPosition(), {
+			// read custom data
+			content: evt.target.getData()
+		});
+		// show info bubble
+		ui.addBubble(bubble);
+		}, false);
+
+		// add marker and bubble
+		$.each(data['data']['rows'], function(i, obj) {
+			addMarkerToGroup(group, {lat:obj['geopoint']['latitude'], lng:obj['geopoint']['longitude']},
+			'<div><a href=\'#\' >'+ obj['name']['name'] +'</a>' +
+			'</div><div >'+ obj['postal_address']['address1'] +', '+ obj['postal_address']['town'] +', '+ obj['postal_address']['county'] +'</div>');
+		});			
+
+	}
+	/******************************************************************************************* END Here Map ******************************************************/
 })
