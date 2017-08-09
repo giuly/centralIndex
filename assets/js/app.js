@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	
 	var itemsPerPage = 10;
 	var step = 2;
 	var centerLng;

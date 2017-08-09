@@ -1,7 +1,7 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/libraries/Api.php';
 
-// This is not safe, to keep api key in source code
+// This is not safe, to keep api key in the source code
 $api = new Api("6nwazmd2mc2dvbrvxjd66jyg");
 // Default language - English
 $defaultLang = 'en';
