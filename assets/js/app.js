@@ -43,9 +43,9 @@ $(document).ready(function() {
 	$('.search').on('click', function(e) {
 		// Prevent form submisson
 		e.preventDefault();
-		// load default page 
+		// Load default page 
 		var page = 1;
-		// call search function
+		// Call search function
 		search(page, true);
 	})
 
@@ -103,7 +103,7 @@ $(document).ready(function() {
 						e.preventDefault();
 						// load page sent from pagination
 						var page = $(this).attr('data-rel');
-						// call search function
+						// Call search function
 						search(page, false);
 					})
 				} else {
@@ -115,7 +115,8 @@ $(document).ready(function() {
 	}
 
 	// Build the pagination
-	// @param - integer (totalRows)
+	// @param1 - integer (totalRows)
+	// @param2 - integer (currentPage)
 	// @return - void
 	function paginate(totalRows, currentPage) {
 
@@ -136,9 +137,7 @@ $(document).ready(function() {
 			if( data['claim']['claim_method']['phone_number'].length != 0) {
 				phoneNumber = '<span class="showPhone"><a href="#">show phone</a></span><span class="phoneNumberHid"><i class="icon-phone"></i>&nbsp;' + data['claim']['claim_method']['phone_number'] + '</span>';
 			}
-		} else {
-			
-		}
+		} 
 		//check if has website url
 		var siteUrl = '<span><i class="icon-ban-circle" aria-hidden="true"></i>&nbsp;Not available</span>';
 		if(typeof data['socialmedia'] != 'undefined') {

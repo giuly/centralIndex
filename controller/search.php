@@ -1,8 +1,8 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/libraries/CentralIndex.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/libraries/Api.php';
 
 // This is not safe, to keep api key in source code
-$api = new CentralIndex("6nwazmd2mc2dvbrvxjd66jyg");
+$api = new Api("6nwazmd2mc2dvbrvxjd66jyg");
 // Default language - English
 $defaultLang = 'en';
 // Default country - Ireland
